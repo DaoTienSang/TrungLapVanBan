@@ -1,0 +1,301 @@
+    <!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm Tra Văn Bản Trùng Lặp Tiếng Việt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="text-center mb-0">Kiểm Tra Văn Bản Trùng Lặp Tiếng Việt</h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="inputTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-input" type="button" role="tab" aria-controls="text-input" aria-selected="true">Nhập văn bản</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-input" type="button" role="tab" aria-controls="file-input" aria-selected="false">Tải file lên</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="inputTabsContent">
+                            <!-- Tab nhập văn bản -->
+                            <div class="tab-pane fade show active" id="text-input" role="tabpanel" aria-labelledby="text-tab">
+                                <form id="duplicate-form">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="text_a" class="form-label fw-bold">Văn bản thứ nhất:</label>
+                                                <textarea class="form-control" id="text_a" name="text_a" rows="6" required></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="text_b" class="form-label fw-bold">Văn bản thứ hai:</label>
+                                                <textarea class="form-control" id="text_b" name="text_b" rows="6" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="check-btn">Kiểm tra trùng lặp</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Tab tải file lên -->
+                            <div class="tab-pane fade" id="file-input" role="tabpanel" aria-labelledby="file-tab">
+                                <form id="file-form">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="file_a" class="form-label fw-bold">File văn bản thứ nhất:</label>
+                                                <input type="file" class="form-control" id="file_a" name="file_a" accept=".txt,.doc,.docx,.pdf" required>
+                                                <div class="form-text">Hỗ trợ các định dạng: TXT, DOC, DOCX, PDF</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="file_b" class="form-label fw-bold">File văn bản thứ hai:</label>
+                                                <input type="file" class="form-control" id="file_b" name="file_b" accept=".txt,.doc,.docx,.pdf" required>
+                                                <div class="form-text">Hỗ trợ các định dạng: TXT, DOC, DOCX, PDF</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="check-file-btn">Kiểm tra trùng lặp</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="result-container" class="mt-4" style="display: none;">
+                            <h3 class="border-bottom pb-2">Kết quả</h3>
+                            
+                            <div class="alert" id="result-summary"></div>
+                            
+                            <!-- Thang đánh giá mức độ trùng lặp -->
+                            <div class="mb-4">
+                                <h4>Mức độ trùng lặp tổng thể</h4>
+                                <div class="position-relative mt-3 mb-4">
+                                    <div class="progress" style="height: 30px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">0-20%</div>
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">21-40%</div>
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">41-60%</div>
+                                        <div class="progress-bar bg-orange" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">61-80%</div>
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">81-100%</div>
+                                    </div>
+                                    <div id="similarity-marker" class="similarity-marker">
+                                        <i class="bi bi-caret-down-fill"></i>
+                                    </div>
+                                    <!-- Thêm thang đo số -->
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <span>0%</span>
+                                        <span>20%</span>
+                                        <span>40%</span>
+                                        <span>60%</span>
+                                        <span>80%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="badge bg-success">Không trùng lặp</span>
+                                    <span class="badge bg-info">Tương đồng nhẹ</span>
+                                    <span class="badge bg-warning">Tương đồng vừa</span>
+                                    <span class="badge bg-orange">Tương đồng cao</span>
+                                    <span class="badge bg-danger">Trùng lặp rõ ràng</span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Độ tương đồng <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Các chỉ số đo lường mức độ giống nhau giữa hai văn bản"></i></h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-striped">
+                                                <tbody id="similarity-results">
+                                                    <!-- Kết quả các loại độ tương đồng sẽ được thêm vào đây -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h5 class="mb-0">Kết quả các mô hình <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Các mô hình AI phân tích từ ngữ, cấu trúc và ngữ nghĩa của hai văn bản"></i></h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-striped">
+                                                <tbody id="model-results">
+                                                    <!-- Kết quả từ các mô hình sẽ được thêm vào đây -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Biểu đồ kết quả -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Biểu đồ phân tích</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="similarityChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Phần so sánh văn bản với đánh dấu từ chung/khác -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">So sánh nội dung</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">Văn bản thứ nhất:</h6>
+                                            <div class="border p-3 rounded" id="highlighted-text-a"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">Văn bản thứ hai:</h6>
+                                            <div class="border p-3 rounded" id="highlighted-text-b"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <div class="d-flex gap-4">
+                                            <div><span class="common-word-sample" style="background-color: rgba(25, 135, 84, 0.2);"></span> Từ chung</div>
+                                            <div><span class="different-word-sample" style="background-color: rgba(220, 53, 69, 0.2);"></span> Từ khác biệt</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Giải thích các chỉ số -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Giải thích các chỉ số</h5>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">Cosine Similarity</dt>
+                                        <dd class="col-sm-9">Đo lường mức độ tương đồng về ngữ nghĩa giữa hai văn bản. Giá trị càng cao, hai văn bản càng giống nhau. Dưới 20% thường không được coi là trùng lặp.</dd>
+                                        
+                                        <dt class="col-sm-3">Jaccard Similarity</dt>
+                                        <dd class="col-sm-9">So sánh số từ chung giữa hai văn bản. Giá trị thấp (&lt;30%) cho thấy ít sự trùng lặp từ ngữ.</dd>
+                                        
+                                        <dt class="col-sm-3">Tỷ lệ từ chung</dt>
+                                        <dd class="col-sm-9">Tỷ lệ từ xuất hiện trong cả hai văn bản so với văn bản ngắn hơn. Giá trị dưới 40% thường không đáng lo ngại.</dd>
+                                        
+                                        <dt class="col-sm-3">Tỷ lệ độ dài</dt>
+                                        <dd class="col-sm-9">So sánh độ dài hai văn bản. Giá trị gần 100% chỉ ra hai văn bản có độ dài tương đương, nhưng không liên quan trực tiếp đến trùng lặp.</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            
+                            <!-- Thông tin về phương pháp xử lý -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Phương pháp xử lý văn bản nâng cao</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Hệ thống sử dụng các kỹ thuật xử lý văn bản tiếng Việt nâng cao:</p>
+                                    <ul>
+                                        <li><strong>Chuẩn hóa dấu tiếng Việt</strong>: Sửa lỗi dấu phổ biến, đảm bảo văn bản được mã hóa đúng.</li>
+                                        <li><strong>Mở rộng viết tắt</strong>: Chuyển từ viết tắt thành dạng đầy đủ (ví dụ: "sv" → "sinh viên", "đh" → "đại học").</li>
+                                        <li><strong>Tách từ tiếng Việt</strong>: Phân tích cấu trúc ngôn ngữ để tách từ đúng (ví dụ: "đại_học" thay vì "đại" + "học").</li>
+                                        <li><strong>Loại bỏ stopwords</strong>: Bỏ qua các từ phổ biến không mang nhiều ý nghĩa ("và", "của", "là",...) để tập trung vào nội dung chính.</li>
+                                    </ul>
+                                    <p>Các mô hình AI được huấn luyện sử dụng đặc trưng trích xuất từ văn bản đã qua xử lý:</p>
+                                    <ul>
+                                        <li><strong>K-Nearest Neighbors (KNN)</strong>: Phân loại dựa trên "lân cận" gần nhất trong không gian đặc trưng.</li>
+                                        <li><strong>Naive Bayes</strong>: Sử dụng xác suất thống kê để phân loại.</li>
+                                        <li><strong>Support Vector Machine (SVM)</strong>: Phân loại bằng cách tìm siêu phẳng tối ưu trong không gian đặc trưng.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Tóm tắt chi tiết -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Tóm tắt chi tiết</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p id="detailed-summary" class="mb-0"></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Nút xuất báo cáo -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-outline-secondary" id="btn-feedback">
+                                    <i class="bi bi-chat-left-text"></i> Phản hồi
+                                </button>
+                                <button class="btn btn-outline-primary" id="btn-export">
+                                    <i class="bi bi-download"></i> Xuất báo cáo PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Footer với thông tin phiên bản -->
+                <div class="mt-3 text-center text-muted">
+                    <small>Phiên bản 2.0 - Cập nhật: SVM và xử lý văn bản tiếng Việt nâng cao</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal phản hồi -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedbackModalLabel">Phản hồi kết quả</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="feedback-form">
+                        <div class="mb-3">
+                            <label for="feedbackRating" class="form-label">Bạn đánh giá kết quả thế nào?</label>
+                            <select class="form-select" id="feedbackRating">
+                                <option value="">-- Chọn đánh giá --</option>
+                                <option value="5">Rất chính xác</option>
+                                <option value="4">Chính xác</option>
+                                <option value="3">Trung bình</option>
+                                <option value="2">Không chính xác</option>
+                                <option value="1">Hoàn toàn không chính xác</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="feedbackComment" class="form-label">Góp ý của bạn (nếu có):</label>
+                            <textarea class="form-control" id="feedbackComment" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="submit-feedback">Gửi phản hồi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html> 
