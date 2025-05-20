@@ -341,4 +341,5 @@ if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port) 
